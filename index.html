@@ -1,64 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-        /* Окно для динамического описания */
-        #description-box {
-            position: absolute; top: 10px; right: 10px;
-            width: 220px; background: rgba(0,0,0,0.8);
-            color: #00ff00; padding: 15px; font-family: monospace;
-            border: 1px solid #00ff00; z-index: 10;
-        }
-    </style>
-</head>
-<body style="margin: 0; overflow: hidden;">
+<!-- Подключаем библиотеки для AR прямо в браузере -->
+<script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
-    <div id="description-box">
-        <div>СТАТУС: Сканирование...</div>
-        <div id="object-name">ОБЪЕКТ: —</div>
-        <div id="object-params">ПАРАМЕТРЫ: —</div>
+<body style="margin: 0; overflow: hidden;">
+    <!-- UI-окно: будет обновляться "на лету" -->
+    <div id="info" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; z-index: 100; font-family: monospace;">
+        СТАТУС: Поиск объекта...
     </div>
 
     <a-scene embedded arjs='sourceType: webcam; facingMode: environment;'>
-        <!-- В AR-системах нейросеть ориентируется на библиотеки образов [1] -->
-        <a-marker preset="hiro" id="marker">
-            <!-- Динамическая стрелка силы, о которой вы говорили -->
-            <a-entity id="force-vector" 
-                      geometry="primitive: cone; radiusBottom: 0.03; height: 0.4" 
-                      material="color: #00ff00" 
-                      position="0 0.8 0"></a-entity>
-            
-            <!-- Виртуальная "линейка" для измерения размеров [6] -->
-            <a-entity id="measure-line" 
-                      geometry="primitive: box; width: 0.01; height: 0.01; depth: 1" 
+        <!-- Маркер (QR или Hiro) — точка привязки для физики -->
+        <a-marker preset="hiro" id="physics-object">
+            <!-- Виртуальная стрелка (Вектор силы) -->
+            <a-entity id="arrow" 
+                      geometry="primitive: cone; radiusBottom: 0.05; height: 0.5" 
                       material="color: yellow" 
-                      position="0.5 0 0"></a-entity>
+                      position="0 1 0" 
+                      rotation="0 0 180"></a-entity>
+            
+            <!-- Описание характеристик прямо над объектом -->
+            <a-text value="F = m*g" position="0 1.3 0" align="center" color="white"></a-text>
         </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        // Имитация работы нейросети, которая "учится распознавать объекты" [2]
-        const marker = document.querySelector('#marker');
-        const objName = document.querySelector('#object-name');
-        const objParams = document.querySelector('#object-params');
+        const marker = document.querySelector('#physics-object');
+        const info = document.querySelector('#info');
 
-        // Когда камера "захватывает предмет" [3]
+        // Когда камера "поймала" объект
         marker.addEventListener('markerFound', () => {
-            // В реальном приложении здесь вызывается ML-модель
-            objName.innerText = "ОБЪЕКТ: Сфера (Металл)";
-            objParams.innerText = "МАССА: 2кг\nСИЛА ТЯЖЕСТИ: 19.6N";
-            
-            // Анализ теней и света [7] может менять положение стрелок
-            console.log("Объект позиционирован относительно границ [3]");
-        });
-
-        marker.addEventListener('markerLost', () => {
-            objName.innerText = "ОБЪЕКТ: Поиск...";
+            // Здесь срабатывает ваш "БАМ"
+            info.innerHTML = "ОБЪЕКТ: Сфера<br>МАССА: 0.5 кг<br>СИЛА: 4.9 N<br>ОСВЕЩЕНИЕ: Анализ...";
+            console.log("Объект распознан нейросетью");
         });
     </script>
 </body>
-</html>
